@@ -5,25 +5,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { PlusCircle, FileText, ExternalLink, Download } from 'lucide-react'
-import { submissionService, type Submission } from '@/services'
+import { submissionService, jobService, type ApplicationResponse } from '@/services'
 
-const getStatusColor = (status: string | null | undefined) => {
-    switch (status) {
-        case 'Under Review':
-            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-        case 'Interview Scheduled':
-            return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-        case 'Rejected':
-            return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-        case 'Accepted':
-            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-        default:
-            return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+type SubmissionWithJob = ApplicationResponse & {
+    job_title?: string;
+    company?: string;
+}
+
+const getStatusColor = (status: string) => {
+    const statusLower = status.toLowerCase()
+    if (statusLower.includes('review') || statusLower.includes('sent')) {
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
     }
+    if (statusLower.includes('interview')) {
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+    }
+    if (statusLower.includes('reject')) {
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    }
+    if (statusLower.includes('accept')) {
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+    }
+    return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
 }
 
 export default function Submissions() {
-    const [submissions, setSubmissions] = useState<Submission[]>([])
+    const [submissions, setSubmissions] = useState<SubmissionWithJob[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -31,8 +38,30 @@ export default function Submissions() {
             try {
                 // In a real app, get user ID from auth context
                 const userId = 1
-                const data = await submissionService.getUserSubmissions(userId)
-                setSubmissions(data)
+                const applications = await submissionService.getUserSubmissions(userId)
+
+                // Fetch job details for each application
+                const submissionsWithJobs = await Promise.all(
+                    applications.map(async (app) => {
+                        try {
+                            const job = await jobService.getById(app.job_offering_id)
+                            return {
+                                ...app,
+                                job_title: job.title,
+                                company: job.company,
+                            }
+                        } catch (error) {
+                            console.error(`Failed to load job ${app.job_offering_id}:`, error)
+                            return {
+                                ...app,
+                                job_title: 'Unknown',
+                                company: 'Unknown',
+                            }
+                        }
+                    })
+                )
+
+                setSubmissions(submissionsWithJobs)
             } catch (error) {
                 console.error('Failed to load submissions:', error)
             } finally {
@@ -75,15 +104,15 @@ export default function Submissions() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardDescription>Total Applications</CardDescription>
+                            <CardDescription>Submitted</CardDescription>
                             <CardTitle className="text-3xl">{submissions.length}</CardTitle>
                         </CardHeader>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardDescription>Under Review</CardDescription>
+                            <CardDescription>In Review</CardDescription>
                             <CardTitle className="text-3xl">
-                                {submissions.filter((s: Submission) => s.status === 'Under Review' || s.status === 'under_review').length}
+                                {submissions.filter((s) => s.status.toLowerCase().includes('review') || s.status.toLowerCase().includes('sent' || s.status === 'under_review')).length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
@@ -91,14 +120,18 @@ export default function Submissions() {
                         <CardHeader className="pb-2">
                             <CardDescription>Interviews</CardDescription>
                             <CardTitle className="text-3xl">
-                                {submissions.filter((s: Submission) => s.status === 'Interview Scheduled' || s.status === 'interview_scheduled').length}
+                                {submissions.filter((s) => s.status.toLowerCase().includes('interview' || s.status === 'interview_scheduled')).length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
                             <CardDescription>Success Rate</CardDescription>
-                            <CardTitle className="text-3xl">33%</CardTitle>
+                            <CardTitle className="text-3xl">
+                                {submissions.length > 0
+                                    ? `${Math.round((submissions.filter((s) => s.status.toLowerCase().includes('accept')).length / submissions.length) * 100)}%`
+                                    : '0%'}
+                            </CardTitle>
                         </CardHeader>
                     </Card>
                 </div>
@@ -136,11 +169,11 @@ export default function Submissions() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {submissions.map((submission: Submission) => (
+                                        {submissions.map((submission) => (
                                             <TableRow key={submission.id}>
                                                 <TableCell className="font-medium">{submission.job_title || 'N/A'}</TableCell>
                                                 <TableCell>{submission.company || 'N/A'}</TableCell>
-                                                <TableCell>{new Date(submission.submitted_date || submission.created_at).toLocaleDateString()}</TableCell>
+                                                <TableCell>{new Date(submission.created_at).toLocaleDateString()}</TableCell>
                                                 <TableCell>
                                                     <Badge variant="secondary" className={getStatusColor(submission.status || 'Draft')}>
                                                         {submission.status || 'Draft'}
@@ -148,7 +181,7 @@ export default function Submissions() {
                                                 </TableCell>
                                                 <TableCell className="text-right space-x-2">
                                                     <Button variant="ghost" size="sm" asChild>
-                                                        <Link to={`/jobs/${submission.id}`}>
+                                                        <Link to={`/jobs/${submission.job_offering_id}`}>
                                                             <ExternalLink className="h-4 w-4" />
                                                         </Link>
                                                     </Button>

@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { PlusCircle, User, Briefcase, Languages, DollarSign, Calendar, Edit } from 'lucide-react'
-import { userService, skillsService, projectService, type UserResponse, type UserSkillsResponse, type ProjectResponse } from '@/services'
+import { userService, skillsService, projectService, apiCall, API_ENDPOINTS, type UserResponse, type UserSkillsResponse, type ProjectResponse, type UserProfileResponse } from '@/services'
 import { mockUserProfile } from '@/services/mockData'
 import { hasProfileData } from '@/utils/profileUtils'
 
 export default function Dashboard() {
     const navigate = useNavigate()
     const [user, setUser] = useState<UserResponse | null>(null)
+    const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null)
     const [skills, setSkills] = useState<UserSkillsResponse[]>([])
     const [projects, setProjects] = useState<ProjectResponse[]>([])
     const [loading, setLoading] = useState(true)
@@ -22,14 +23,16 @@ export default function Dashboard() {
             try {
                 // In a real app, get user ID from auth context
                 const userId = 1
-                const [userData, skillsData, projectsData] = await Promise.all([
+                const [userData, skillsData, projectsData, profileData] = await Promise.all([
                     userService.getById(userId),
                     skillsService.getByUserId(userId).catch(() => []),
                     projectService.getUserProjects(userId).catch(() => []),
+                    apiCall<UserProfileResponse>(API_ENDPOINTS.userProfile(userId)).catch(() => null),
                 ])
                 setUser(userData)
                 setSkills(skillsData)
                 setProjects(projectsData)
+                setUserProfile(profileData)
             } catch (error) {
                 console.error('Failed to load dashboard data:', error)
                 setError('Failed to load your profile data. Please check if the backend is running.')
@@ -105,9 +108,9 @@ export default function Dashboard() {
     const languageSkill = skillsArray.find(s => s.skill_type === 'extra' && s.skill_text.toLowerCase().includes('english'))
     const languages = languageSkill ? languageSkill.skill_text.split(',').map(l => l.trim()) : mockUserProfile.languages
 
-    // Use centralized mock data for fields not yet in backend
-    const yearsExperience = 5 // TODO: Calculate from experience skills
-    const estimatedSalary = mockUserProfile.estimatedSalary
+    // Use real data from backend, no fallbacks
+    const yearsExperience = userProfile?.years_of_experience ?? null
+    const estimatedSalary = userProfile?.salary_range || 'No se sabe'
     const lastPosition = projects?.[0]?.target_role ?? experiences[0]?.position ?? 'Full Stack Developer'
     const experience = experiences.length > 0 ? experiences : mockUserProfile.experience
 
@@ -171,7 +174,9 @@ export default function Dashboard() {
                                     <Calendar className="mr-2 h-4 w-4" />
                                     Experience
                                 </div>
-                                <p className="font-medium text-gray-900 dark:text-white">{yearsExperience} years</p>
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                    {yearsExperience !== null ? `${yearsExperience} years` : 'No se sabe'}
+                                </p>
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center text-sm text-muted-foreground">

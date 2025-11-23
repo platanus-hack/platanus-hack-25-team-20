@@ -21,12 +21,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { userService, type UserResponse } from '@/services'
 
 export default function MainLayout() {
     const navigate = useNavigate()
     const location = useLocation()
     const [theme, setTheme] = useState<'light' | 'dark'>('light')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [user, setUser] = useState<UserResponse | null>(null)
 
     // Initialize theme from localStorage or system preference
     useEffect(() => {
@@ -37,6 +39,21 @@ export default function MainLayout() {
         if (initialTheme === 'dark') {
             document.documentElement.classList.add('dark')
         }
+    }, [])
+
+    // Load user data
+    useEffect(() => {
+        async function loadUser() {
+            try {
+                // TODO: Get actual user ID from auth context
+                const userId = 1
+                const userData = await userService.getById(userId)
+                setUser(userData)
+            } catch (error) {
+                console.error('Failed to load user:', error)
+            }
+        }
+        loadUser()
     }, [])
 
     const toggleTheme = () => {
@@ -165,12 +182,12 @@ export default function MainLayout() {
                                 <div className="flex items-center gap-3 p-2">
                                     <Avatar className="h-10 w-10">
                                         <AvatarFallback className="gradient-primary text-white font-semibold">
-                                            JD
+                                            {user ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-medium">John Doe</span>
-                                        <span className="text-xs text-muted-foreground">john@example.com</span>
+                                        <span className="text-sm font-medium">{user?.full_name || 'Loading...'}</span>
+                                        <span className="text-xs text-muted-foreground">{user?.email || ''}</span>
                                     </div>
                                 </div>
                                 <DropdownMenuSeparator />

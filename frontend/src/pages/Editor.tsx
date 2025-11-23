@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { ArrowLeft, Send, FileDown, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Send, FileDown, CheckCircle2, Loader2 } from 'lucide-react'
 import TypstRenderer from '@/components/TypstRenderer'
-import { cvService } from '@/services'
+import { cvService, submissionService } from '@/services'
 import type { CVResponse } from '@/services'
 
 export default function Editor() {
     const navigate = useNavigate()
+    const location = useLocation()
     const { id } = useParams() // This is the CV ID
     const [message, setMessage] = useState('')
     const [cv, setCV] = useState<CVResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [regenerating, setRegenerating] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const jobOfferingId = location.state?.jobOfferingId as string | undefined // Get job_offering_id from navigation state
     const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([
         {
             role: 'ai',
@@ -88,10 +91,37 @@ export default function Editor() {
         }
     }
 
-    const handleSubmit = () => {
-        // TODO: Implement submission logic
-        alert('CV submitted successfully!')
-        navigate('/submissions')
+    const handleSubmit = async () => {
+        if (!cv || !jobOfferingId) {
+            alert('Error: Missing CV or job information')
+            return
+        }
+
+        setSubmitting(true)
+        try {
+            const userId = 1 // TODO: Get from auth context
+            
+            // Create the application
+            const application = await submissionService.create({
+                user_id: userId,
+                job_offering_id: jobOfferingId,
+                status: 'Sent',
+                notes: null,
+            })
+            
+            // Update the application with the CV ID
+            await submissionService.update(application.id, {
+                cv_id: cv.id,
+            })
+            
+            alert('Application submitted successfully!')
+            navigate('/submissions')
+        } catch (error) {
+            console.error('Failed to submit application:', error)
+            alert('Failed to submit application. Please try again.')
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     return (
@@ -116,9 +146,19 @@ export default function Editor() {
                         <Button
                             className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                             onClick={handleSubmit}
+                            disabled={submitting || !jobOfferingId}
                         >
-                            <CheckCircle2 className="mr-2 h-4 w-4" />
-                            Submit Application
+                            {submitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                    Submit Application
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

@@ -123,8 +123,8 @@ def generate_cv_content(
         "- Escribe todo en ESPAÑOL",
         "- El resumen debe ser conciso (2-3 líneas)",
         "- Las descripciones deben ser claras y orientadas a resultados",
-        "- Usa el nombre completo del usuario para firstname y lastname",
-        "- Si no tienes información específica, inventa datos profesionales coherentes",
+        f"- IMPORTANTE: Usa EXACTAMENTE el nombre '{user.full_name}' sin modificarlo. Divide en firstname y lastname según corresponda.",
+        "- Si no tienes información específica de experiencia o educación, inventa datos profesionales coherentes",
     ])
     
     prompt = "\n".join(prompt_parts)

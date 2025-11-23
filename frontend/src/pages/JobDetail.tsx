@@ -5,28 +5,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, MapPin, Clock, DollarSign, Briefcase, Edit, Send, FileDown } from 'lucide-react'
-import { jobService, cvService, projectService, type Job } from '@/services'
+import { jobService, cvService, projectService, userService, type Job, type UserResponse } from '@/services'
 import { cleanHtml } from "@/utils/htmlCleaner";
 export default function JobDetail() {
     const navigate = useNavigate()
     const { id } = useParams()
     const [job, setJob] = useState<Job | null>(null)
+    const [user, setUser] = useState<UserResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [creatingCV, setCreatingCV] = useState(false)
 
     useEffect(() => {
-        async function loadJob() {
+        async function loadData() {
             if (!id) return
             try {
-                const data = await jobService.getById(id)
-                setJob(data)
+                // TODO: Get actual user ID from auth context
+                const userId = 1
+                const [jobData, userData] = await Promise.all([
+                    jobService.getById(id),
+                    userService.getById(userId)
+                ])
+                setJob(jobData)
+                setUser(userData)
             } catch (error) {
-                console.error('Failed to load job:', error)
+                console.error('Failed to load data:', error)
             } finally {
                 setLoading(false)
             }
         }
-        loadJob()
+        loadData()
     }, [id])
 
     const handleCustomizeCV = async () => {
@@ -65,8 +72,8 @@ export default function JobDetail() {
                 ],
             })
             
-            // Navigate to editor with the CV ID
-            navigate(`/editor/${cv.id}`)
+            // Navigate to editor with the CV ID and job offering ID
+            navigate(`/editor/${cv.id}`, { state: { jobOfferingId: id } })
         } catch (error) {
             console.error('Failed to create CV:', error)
             alert('Failed to create CV. Please try again.')
@@ -198,10 +205,10 @@ export default function JobDetail() {
                       <div className="space-y-3 text-sm">
                         <div>
                           <p className="font-bold text-gray-900 dark:text-white">
-                            John Doe
+                            {user?.full_name || 'Loading...'}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Full Stack Developer
+                            {user?.email || ''}
                           </p>
                         </div>
                         <Separator />
@@ -210,8 +217,7 @@ export default function JobDetail() {
                             Summary
                           </p>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Experienced developer with 5+ years building
-                            scalable applications...
+                            CV will be generated with AI when you click "Customize CV"
                           </p>
                         </div>
                         <div>
@@ -219,7 +225,7 @@ export default function JobDetail() {
                             Skills
                           </p>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            React, Node.js, PostgreSQL, AWS...
+                            Your skills will be automatically included...
                           </p>
                         </div>
                       </div>
