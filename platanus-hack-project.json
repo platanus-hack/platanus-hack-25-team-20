@@ -1,4 +1,5 @@
 {
-  "project-name": "<FILL THIS>",
-  "project-description-spanish": "<FILL THIS>"
+  "project-name": "PostulaMe",
+  "project-description-spanish": "Aplicacion que automatiza el ciclo completo de búsqueda de empleo. No solo encuentra vacantes; readapta tu CV semánticamente para cada empresa específica garantizando el 'match' perfecto. Menos burocracia más oportunidades reales",
+  "deploy-url": "https://hackaton-frontend-n67jq43uqq-uc.a.run.app"
 }
