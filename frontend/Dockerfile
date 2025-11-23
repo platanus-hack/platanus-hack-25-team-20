@@ -6,6 +6,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+# Set API URL to use nginx proxy (empty means relative URLs)
+ENV VITE_API_URL=""
+
 RUN npm run build
 
 FROM nginx:alpine

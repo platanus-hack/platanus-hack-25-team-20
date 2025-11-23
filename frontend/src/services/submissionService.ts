@@ -9,6 +9,7 @@ export const submissionService = {
             return {
                 id: Date.now(),
                 ...data,
+                cv_id: null,
                 job_title: 'Mock Job Title', // Would be filled from job data
                 company: 'Mock Company',
                 submitted_date: new Date().toISOString(),

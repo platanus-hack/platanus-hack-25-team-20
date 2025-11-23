@@ -40,6 +40,8 @@ app.add_middleware(
         "http://localhost:5173",  # Vite dev server
         "http://localhost:4173",  # Vite preview
         "http://localhost:3000",  # Alternative dev port
+        "http://localhost",       # Docker frontend (port 80)
+        "http://localhost:80",    # Docker frontend (explicit port)
     ],
     allow_credentials=True,
     allow_methods=["*"],

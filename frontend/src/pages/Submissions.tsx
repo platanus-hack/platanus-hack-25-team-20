@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PlusCircle, FileText, ExternalLink, Download } from 'lucide-react'
 import { submissionService, type Submission } from '@/services'
 
-const getStatusColor = (status: Submission['status']) => {
+const getStatusColor = (status: string | null | undefined) => {
     switch (status) {
         case 'Under Review':
             return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
@@ -83,7 +83,7 @@ export default function Submissions() {
                         <CardHeader className="pb-2">
                             <CardDescription>Under Review</CardDescription>
                             <CardTitle className="text-3xl">
-                                {submissions.filter((s: Submission) => s.status === 'Under Review').length}
+                                {submissions.filter((s: Submission) => s.status === 'Under Review' || s.status === 'under_review').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
@@ -91,7 +91,7 @@ export default function Submissions() {
                         <CardHeader className="pb-2">
                             <CardDescription>Interviews</CardDescription>
                             <CardTitle className="text-3xl">
-                                {submissions.filter((s: Submission) => s.status === 'Interview Scheduled').length}
+                                {submissions.filter((s: Submission) => s.status === 'Interview Scheduled' || s.status === 'interview_scheduled').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
@@ -138,12 +138,12 @@ export default function Submissions() {
                                     <TableBody>
                                         {submissions.map((submission: Submission) => (
                                             <TableRow key={submission.id}>
-                                                <TableCell className="font-medium">{submission.job_title}</TableCell>
-                                                <TableCell>{submission.company}</TableCell>
-                                                <TableCell>{new Date(submission.submitted_date).toLocaleDateString()}</TableCell>
+                                                <TableCell className="font-medium">{submission.job_title || 'N/A'}</TableCell>
+                                                <TableCell>{submission.company || 'N/A'}</TableCell>
+                                                <TableCell>{new Date(submission.submitted_date || submission.created_at).toLocaleDateString()}</TableCell>
                                                 <TableCell>
-                                                    <Badge variant="secondary" className={getStatusColor(submission.status)}>
-                                                        {submission.status}
+                                                    <Badge variant="secondary" className={getStatusColor(submission.status || 'Draft')}>
+                                                        {submission.status || 'Draft'}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right space-x-2">

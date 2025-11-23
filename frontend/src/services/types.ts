@@ -16,9 +16,10 @@ export interface UserLogin {
 export interface UserResponse {
   id: number;
   email: string;
-  full_name: string;
+  full_name: string | null;
   created_at: string;
   updated_at: string;
+  password?: string | null;
 }
 
 export interface UserUpdate {
@@ -102,7 +103,7 @@ export interface UserSkillsResponse {
   user_id: number;
   skill_text: string;
   skill_type: SkillType;
-  raw_input: string | null;
+  raw_input?: string | null;
   source: string | null;
   created_at: string;
   updated_at: string;
@@ -222,10 +223,14 @@ export interface ApplicationResponse {
   user_id: number;
   job_offering_id: string;
   cv_id: number | null;
-  status: string;
+  status: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Additional fields for UI display (optional, may come from mock data)
+  job_title?: string;
+  company?: string;
+  submitted_date?: string;
 }
 
 export interface ApplicationUpdate {

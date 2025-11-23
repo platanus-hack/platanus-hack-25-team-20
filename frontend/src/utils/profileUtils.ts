@@ -40,7 +40,7 @@ export const getOnboardingProgress = (uploadStates: UploadStates) => {
  * Checks if user is visiting for the first time (no profile data)
  */
 export const isFirstTimeUser = (
-    skills: UserSkillsResponse | null | undefined,
+    skills: UserSkillsResponse[] | null | undefined,
     projects: ProjectResponse[] | null | undefined
 ): boolean => {
     return !hasProfileData(skills, projects)
