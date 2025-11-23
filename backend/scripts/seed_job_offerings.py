@@ -14,11 +14,17 @@ from app.database.models import JobOffering
 def seed_job_offerings():
     """Seed job offerings with data from job_offerings_final.json."""
     db = SessionLocal()
-    
+
     # Path to the JSON file
     json_path = os.path.join(os.path.dirname(__file__), 'job_offerings_final.json')
-    
+
     try:
+        # Delete all existing job offerings
+        print("🗑️  Deleting existing job offerings...")
+        deleted_count = db.query(JobOffering).delete()
+        db.commit()
+        print(f"   Deleted {deleted_count} existing job offerings.")
+        print()
         with open(json_path, 'r', encoding='utf-8') as f:
             job_data_list = json.load(f)
             
