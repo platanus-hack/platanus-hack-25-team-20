@@ -1,0 +1,60 @@
+{
+    "tableName": "job_offerings",
+    "$schema": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "string", // should be our internal UUID
+                "nullable": false
+            },
+            "company_name": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "url": {
+                "type": "string"
+            },
+            "salary": {
+                "type": "string"
+            },
+            "role_name": {
+                "type": "string"
+            },
+            "location": {
+                "type": "string"
+            },
+            "work_mode": {
+                "type": "string" // por proyecto, full time, etc...
+            },
+            "type": {
+                "type": "string" // hibrido, presencial (no aparece en linkedin sin auth)
+            },
+            "post_date": {
+                "type": "datetime"
+            },
+            "last_updated": {
+                "type": "datetime"
+            },
+            "sectors": {
+                "type": "string" // Tecnologia, consultoria, etc...
+            },
+            "extra_data": {
+                "type": "json" // has keys like seniority, responsability, etc...
+            },
+            "uid": {
+                "type": "string"
+            },
+            "created_at": {
+                "type": "datetime" // default fields
+            },
+            "updated_at": {
+                "type": "datetime" // default fields
+            },
+            "api_url": {
+                "type": "string" // in case we need go update data
+            }
+        }
+    }
+}

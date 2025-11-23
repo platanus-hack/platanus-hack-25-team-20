@@ -1,0 +1,11 @@
+{
+    "linkedin": {
+        "domain": "cl",
+        "jobFields": {
+            "seniority": "Nivel de antigüedad",
+            "responsability": "Función laboral",
+            "work_mode": "Tipo de empleo",
+            "sectors": "Sectores"
+        }
+    }
+}

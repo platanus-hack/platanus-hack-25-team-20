@@ -1,0 +1,4 @@
+# Rendered test files
+*.pdf
+rendered_test.*
+llm_test_output.*

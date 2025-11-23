@@ -1,0 +1,291 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Theme - Base Surfaces */
+    --background: 0 0% 100%;
+    /* #FFFFFF */
+    --foreground: 220 26% 14%;
+    /* Near black for text */
+    --muted-bg: 220 13% 97%;
+    /* #F6F8FB */
+
+    /* Cards & Panels */
+    --card: 0 0% 100%;
+    /* #FFFFFF */
+    --card-foreground: 220 26% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 26% 14%;
+
+    /* Primary - Professional Blue Gradient (Job-focused) */
+    --primary: 221 83% 53%;
+    /* #2563EB - Professional Blue */
+    --primary-hover: 221 83% 60%;
+    /* Lighter Professional Blue */
+    --primary-gradient-end: 221 93% 44%;
+    /* #1E40AF - Deep Blue */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Accents */
+    --accent-mint: 160 84% 39%;
+    /* #10B981 */
+    --accent-amber: 38 92% 50%;
+    /* #F59E0B */
+    --accent-coral: 17 88% 54%;
+    /* #F97316 */
+
+    /* Semantic Colors */
+    --secondary: 220 13% 97%;
+    --secondary-foreground: 220 26% 14%;
+    --muted: 220 13% 97%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 221 91% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 220 13% 91%;
+    /* #E5E7EB */
+    --border-strong: 220 13% 80%;
+    --input: 220 13% 91%;
+    --ring: 221 91% 57%;
+
+    /* Chart Colors */
+    --chart-1: 221 91% 57%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 17 88% 54%;
+
+    /* Border Radius */
+    --radius: 0.875rem;
+    /* 14px for cards */
+    --radius-lg: 1rem;
+    /* 16px for larger elements */
+    --radius-pill: 9999px;
+    /* For chips/pills */
+
+    /* Typography Scale (in rem) */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 2rem;
+    /* 32px */
+    --text-4xl: 2.5rem;
+    /* 40px */
+    --text-5xl: 3.5rem;
+    /* 56px */
+  }
+
+  .dark {
+    /* Dark Theme - Base Surfaces */
+    --background: 222 47% 7%;
+    /* #0B1021 */
+    --foreground: 210 40% 98%;
+    --muted-bg: 217 33% 11%;
+    /* #0F172A */
+
+    /* Cards & Panels */
+    --card: 217 33% 11%;
+    /* #0F172A */
+    --card-foreground: 210 40% 98%;
+    --popover: 217 33% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary - Professional Blue (same in dark) */
+    --primary: 221 83% 53%;
+    /* #2563EB - Professional Blue */
+    --primary-hover: 221 83% 60%;
+    /* Lighter Professional Blue */
+    --primary-gradient-end: 221 93% 44%;
+    /* #1E40AF - Deep Blue */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Accents (same in dark) */
+    --accent-mint: 160 84% 39%;
+    /* #10B981 */
+    --accent-amber: 38 92% 50%;
+    /* #F59E0B */
+    --accent-coral: 17 88% 54%;
+    /* #F97316 */
+
+    /* Semantic Colors */
+    --secondary: 217 33% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 221 91% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Borders - Translucent in dark */
+    --border: 217 33% 14%;
+    /* #1F2937 */
+    --border-strong: 217 33% 20%;
+    --input: 217 33% 14%;
+    --ring: 221 91% 57%;
+
+    /* Chart Colors (same) */
+    --chart-1: 221 91% 57%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 17 88% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.35;
+  }
+
+  /* Focus rings for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary/60 ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+
+  /* Gradient utilities */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-hover)) 50%, hsl(var(--primary-gradient-end)) 100%);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent gradient-primary;
+  }
+
+  /* Shadow utilities for depth */
+  .shadow-card {
+    box-shadow: 0 15px 50px -24px rgba(15, 23, 42, 0.5);
+  }
+
+  .shadow-card-dark {
+    box-shadow: 0 15px 50px -24px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border border-white/20 dark:border-white/10;
+  }
+
+  /* Shimmer animation for skeletons */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .shimmer {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(to right,
+        hsl(var(--muted)) 0%,
+        hsl(var(--muted-bg)) 50%,
+        hsl(var(--muted)) 100%);
+    background-size: 1000px 100%;
+  }
+
+  /* Transition utilities */
+  .transition-fast {
+    transition: all 150ms ease-out;
+  }
+
+  .transition-smooth {
+    transition: all 220ms ease-out;
+  }
+
+  .transition-modal {
+    transition: all 300ms ease-in-out;
+  }
+}
+
+@layer utilities {
+
+  /* Custom border radius */
+  .rounded-card {
+    border-radius: var(--radius);
+  }
+
+  .rounded-card-lg {
+    border-radius: var(--radius-lg);
+  }
+
+  .rounded-pill {
+    border-radius: var(--radius-pill);
+  }
+
+  /* Typography scale */
+  .text-xs {
+    font-size: var(--text-xs);
+  }
+
+  .text-sm {
+    font-size: var(--text-sm);
+  }
+
+  .text-base {
+    font-size: var(--text-base);
+  }
+
+  .text-lg {
+    font-size: var(--text-lg);
+  }
+
+  .text-xl {
+    font-size: var(--text-xl);
+  }
+
+  .text-2xl {
+    font-size: var(--text-2xl);
+  }
+
+  .text-3xl {
+    font-size: var(--text-3xl);
+  }
+
+  .text-4xl {
+    font-size: var(--text-4xl);
+  }
+
+  .text-5xl {
+    font-size: var(--text-5xl);
+  }
+}

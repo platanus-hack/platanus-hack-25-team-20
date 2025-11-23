@@ -1,0 +1,11 @@
+{
+    "linkedin": {
+        "domain": "www",
+        "jobFields": {
+            "seniority": "Seniority level",
+            "responsability": "Employment type",
+            "work_mode": "Job function",
+            "sectors": "Industries"
+        }
+    }
+}

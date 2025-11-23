@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    // === Output ===
+    "rootDir": "src",
+    "outDir": "dist",
+
+    // === Module system (ESM for Node) ===
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2022", // modern & compatible with Node 18–22
+    "lib": ["es2022"],
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "$scrappers/*": ["src/scrappers/*"],
+      "$scrappers": ["src/scrappers/index"],
+      "$models/*": ["src/models/*"],
+      "$middlewares/*": ["src/middlewares/*"],
+      "$routes/*": ["src/routes/*"],
+      "$types/*": ["src/types/*"],
+      "$controllers/*": ["src/controllers/*"],
+      "$locale": ["src/locale/index"]
+    },
+
+    // === Emit ===
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // === Strictness ===
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // === Modules / imports ===
+    "verbatimModuleSyntax": true, // required for ESM correctness
+
+    // === Performance / stability ===
+    "skipLibCheck": true,
+    "isolatedModules": true // required for ts-node + ESM
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

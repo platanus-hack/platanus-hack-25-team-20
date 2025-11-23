@@ -1,0 +1,20 @@
+export type JobOffering = {
+  id?: string;
+  company_name: string | null;
+  description: string;
+  url: string;
+  salary: string | null;
+  role_name: string;
+  location: string | null;
+  work_mode: string | null;
+  type: string | null;
+  post_date: Date;
+  last_updated?: Date;
+  sectors?: string;
+  extra_data: Record<string, any> | null;
+  uid: string;
+  created_at?: Date;
+  updated_at?: Date;
+  api_url?: string;
+  keyword: string;
+};

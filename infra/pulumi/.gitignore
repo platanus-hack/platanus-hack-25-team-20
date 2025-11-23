@@ -1,0 +1,4 @@
+node_modules
+bin
+Pulumi.*.yaml
+package-lock.json

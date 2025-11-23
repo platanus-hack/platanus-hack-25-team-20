@@ -1,0 +1,33 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Backend for CV generation app - Hackaton Platanus 2025"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlalchemy>=2.0.36",
+    "psycopg2-binary>=2.9.11",
+    "pydantic[email]>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "alembic>=1.14.0",
+    "python-multipart>=0.0.17",
+    "jinja2>=3.1.0",
+    "sqladmin>=0.21.0",
+    "instructor>=1.7.0",
+    "anthropic>=0.39.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.0",
+    "pytest-mock-resources>=2.12.0",
+    "itsdangerous>=2.2.0",
+]
+
+[project.optional-dependencies]
+admin = [
+    "sqladmin>=0.21.0",
+    "wtforms>=3.1.0",
+]
+
+

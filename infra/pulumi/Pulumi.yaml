@@ -1,0 +1,3 @@
+name: hackaton-platanus-25
+runtime: nodejs
+description: Infrastructure for the hackaton-platanus-25 stack on GCP
