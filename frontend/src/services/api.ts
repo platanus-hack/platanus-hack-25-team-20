@@ -26,7 +26,6 @@ export const API_ENDPOINTS = {
     projectCVs: (projectId: number) => `${API_BASE_URL}/api/v1/projects/${projectId}/cvs`,
     cvById: (cvId: number) => `${API_BASE_URL}/api/v1/cvs/${cvId}`,
     cvRegenerate: (cvId: number) => `${API_BASE_URL}/api/v1/cvs/${cvId}/regenerate`,
-    cvRender: (cvId: number) => `${API_BASE_URL}/api/v1/cvs/${cvId}/render`,
     
     // Templates
     templates: `${API_BASE_URL}/api/v1/templates`,

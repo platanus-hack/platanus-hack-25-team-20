@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, MapPin, Clock, DollarSign, Briefcase, Edit, Send, FileDown } from 'lucide-react'
-import { jobService, type Job } from '@/services'
+import { jobService, cvService, projectService, type Job } from '@/services'
 
 export default function JobDetail() {
     const navigate = useNavigate()
     const { id } = useParams()
     const [job, setJob] = useState<Job | null>(null)
     const [loading, setLoading] = useState(true)
+    const [creatingCV, setCreatingCV] = useState(false)
 
     useEffect(() => {
         async function loadJob() {
@@ -27,6 +28,52 @@ export default function JobDetail() {
         }
         loadJob()
     }, [id])
+
+    const handleCustomizeCV = async () => {
+        if (!id || !job) return
+        
+        setCreatingCV(true)
+        try {
+            // TODO: Get actual user ID from auth context
+            const userId = 1
+            
+            // Get user's projects
+            const projects = await projectService.getUserProjects(userId)
+            let projectId = projects[0]?.id
+            
+            // If no projects, create a default one
+            if (!projectId) {
+                const newProject = await projectService.create({
+                    user_id: userId,
+                    name: `Application for ${job.company}`,
+                    target_role: job.title,
+                })
+                projectId = newProject.id
+            }
+            
+            // Create CV with the job offering information
+            // TODO: Get template_id from user preference or use default (1)
+            const cv = await cvService.create(projectId, {
+                project_id: projectId,
+                template_id: 1, // Default template
+                messages: [
+                    {
+                        role: 'user',
+                        content: `Create a CV optimized for the position: ${job.title} at ${job.company}. ${job.description}`,
+                        timestamp: new Date().toISOString(),
+                    }
+                ],
+            })
+            
+            // Navigate to editor with the CV ID
+            navigate(`/editor/${cv.id}`)
+        } catch (error) {
+            console.error('Failed to create CV:', error)
+            alert('Failed to create CV. Please try again.')
+        } finally {
+            setCreatingCV(false)
+        }
+    }
 
     if (loading) {
         return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">Loading...</div>
@@ -155,10 +202,11 @@ export default function JobDetail() {
                                     <div className="space-y-2">
                                         <Button
                                             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                            onClick={() => navigate(`/editor/${id}`)}
+                                            onClick={handleCustomizeCV}
+                                            disabled={creatingCV}
                                         >
                                             <Edit className="mr-2 h-4 w-4" />
-                                            Customize CV
+                                            {creatingCV ? 'Creating CV...' : 'Customize CV'}
                                         </Button>
                                         <div className="grid grid-cols-2 gap-2">
                                             <Button variant="outline" size="sm">

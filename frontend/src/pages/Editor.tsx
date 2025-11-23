@@ -1,33 +1,91 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ArrowLeft, Send, FileDown, CheckCircle2 } from 'lucide-react'
 import TypstRenderer from '@/components/TypstRenderer'
-import renderedTestTyp from '@/media/rendered_test.typ?raw'
+import { cvService } from '@/services'
+import type { CVResponse } from '@/services'
 
 export default function Editor() {
     const navigate = useNavigate()
-    const { id } = useParams()
+    const { id } = useParams() // This is the CV ID
     const [message, setMessage] = useState('')
-    const [typstContent] = useState(renderedTestTyp)
-    const [chatHistory, setChatHistory] = useState([
+    const [cv, setCV] = useState<CVResponse | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [regenerating, setRegenerating] = useState(false)
+    const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([
         {
             role: 'ai',
             content: 'Hi! I can help you customize your CV for this position. What would you like to change?',
         },
     ])
 
-    const handleSendMessage = () => {
-        if (!message.trim()) return
+    useEffect(() => {
+        async function loadCV() {
+            if (!id) return
+            try {
+                const cvId = parseInt(id)
+                const cvData = await cvService.getById(cvId)
+                setCV(cvData)
+                
+                // Load conversation history if exists
+                if (cvData.conversation_history && Array.isArray(cvData.conversation_history)) {
+                    const history = cvData.conversation_history.map((entry: any) => ({
+                        role: entry.role === 'user' ? 'user' : 'ai',
+                        content: entry.content || entry.instructions || '',
+                    }))
+                    setChatHistory([
+                        {
+                            role: 'ai',
+                            content: 'Hi! I can help you customize your CV for this position. What would you like to change?',
+                        },
+                        ...history
+                    ])
+                }
+            } catch (error) {
+                console.error('Failed to load CV:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadCV()
+    }, [id])
 
-        setChatHistory([
-            ...chatHistory,
-            { role: 'user', content: message },
-            { role: 'ai', content: 'I\'ve updated your CV based on your request. Please review the changes on the right.' },
-        ])
+    const handleSendMessage = async () => {
+        if (!message.trim() || !cv) return
+
+        const userMessage = { role: 'user', content: message }
+        setChatHistory([...chatHistory, userMessage])
         setMessage('')
+        setRegenerating(true)
+
+        try {
+            const updatedCV = await cvService.regenerate(cv.id, {
+                messages: [{
+                    role: 'user',
+                    content: message,
+                    timestamp: new Date().toISOString(),
+                }]
+            })
+            
+            setCV(updatedCV)
+            setChatHistory([
+                ...chatHistory,
+                userMessage,
+                { role: 'ai', content: 'I\'ve updated your CV based on your request. Please review the changes on the right.' }
+            ])
+        } catch (error) {
+            console.error('Failed to regenerate CV:', error)
+            setChatHistory([
+                ...chatHistory,
+                userMessage,
+                { role: 'ai', content: 'Sorry, I encountered an error while updating your CV. Please try again.' }
+            ])
+        } finally {
+            setRegenerating(false)
+        }
     }
 
     const handleSubmit = () => {
@@ -103,23 +161,24 @@ export default function Editor() {
                     <div className="p-4 border-t border-gray-200 dark:border-gray-800">
                         <div className="flex gap-2">
                             <Textarea
-                                placeholder="Ask AI to modify your CV..."
+                                placeholder={regenerating ? "Generating..." : "Ask AI to modify your CV..."}
                                 className="resize-none"
                                 rows={3}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                    if (e.key === 'Enter' && !e.shiftKey && !regenerating) {
                                         e.preventDefault()
                                         handleSendMessage()
                                     }
                                 }}
+                                disabled={regenerating}
                             />
                             <Button
                                 size="icon"
                                 className="h-auto aspect-square"
                                 onClick={handleSendMessage}
-                                disabled={!message.trim()}
+                                disabled={!message.trim() || regenerating}
                             >
                                 <Send className="h-5 w-5" />
                             </Button>
@@ -133,11 +192,15 @@ export default function Editor() {
                 {/* CV Preview Panel with Typst Renderer */}
                 <div className="bg-gray-100 dark:bg-gray-900 overflow-y-auto flex items-start justify-center p-8">
                     <div className="w-full max-w-3xl bg-white dark:bg-gray-950 shadow-lg rounded-lg overflow-hidden">
-                        {typstContent ? (
-                            <TypstRenderer content={typstContent} className="p-4" />
-                        ) : (
+                        {loading ? (
                             <div className="flex items-center justify-center h-96">
                                 <p className="text-muted-foreground">Loading CV...</p>
+                            </div>
+                        ) : cv?.rendered_content ? (
+                            <TypstRenderer content={cv.rendered_content} className="p-4" />
+                        ) : (
+                            <div className="flex items-center justify-center h-96">
+                                <p className="text-muted-foreground">No CV content available</p>
                             </div>
                         )}
                     </div>

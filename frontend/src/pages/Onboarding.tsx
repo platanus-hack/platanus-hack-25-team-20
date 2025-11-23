@@ -11,7 +11,7 @@ import { Upload, Github, Linkedin, MessageSquare, ArrowRight, CheckCircle2, Load
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { UploadStates } from '@/utils/profileUtils'
 import { getOnboardingProgress } from '@/utils/profileUtils'
-import { API_ENDPOINTS, apiCall } from '@/services/api'
+import { extractionService } from '@/services'
 
 interface ChatMessage {
     role: 'user' | 'assistant'
@@ -64,12 +64,9 @@ export default function Onboarding() {
             
             // Call extraction endpoint
             const userId = 1 // In a real app, get from auth context
-            await apiCall(API_ENDPOINTS.extractProfile(userId), {
-                method: 'POST',
-                body: JSON.stringify({
-                    text: text.substring(0, 10000), // Limit text size
-                    source: 'cv_upload',
-                }),
+            await extractionService.extractProfile(userId, {
+                text: text.substring(0, 10000), // Limit text size
+                source: 'cv_upload',
             })
 
             setUploadStates(prev => ({
@@ -145,12 +142,9 @@ export default function Onboarding() {
         try {
             // Call extraction endpoint with chat text
             const userId = 1 // In a real app, get from auth context
-            const response = await apiCall<{ message: string }>(API_ENDPOINTS.extractProfile(userId), {
-                method: 'POST',
-                body: JSON.stringify({
-                    text: userMessage,
-                    source: 'chat',
-                }),
+            const response = await extractionService.extractProfile(userId, {
+                text: userMessage,
+                source: 'chat',
             })
 
             // Add AI response
