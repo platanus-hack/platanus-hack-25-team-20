@@ -1,3 +1,4 @@
+import re
 import instructor
 from anthropic import Anthropic
 from sqlalchemy.orm import Session
@@ -8,6 +9,37 @@ from app.types.cv_content_types import GeneratedCVContentSimple
 
 
 client = instructor.from_anthropic(Anthropic(api_key=settings.anthropic_api_key))
+
+
+def clean_html_text(text: str) -> str:
+    """
+    Limpia tags HTML de un texto, dejando solo el contenido legible.
+    
+    Args:
+        text: Texto con posibles tags HTML
+        
+    Returns:
+        Texto limpio sin tags HTML
+    """
+    if not text:
+        return text
+    
+    # Eliminar tags HTML
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # Decodificar entidades HTML comunes
+    text = text.replace('&nbsp;', ' ')
+    text = text.replace('&lt;', '<')
+    text = text.replace('&gt;', '>')
+    text = text.replace('&amp;', '&')
+    text = text.replace('&quot;', '"')
+    text = text.replace('&#39;', "'")
+    
+    # Limpiar espacios múltiples y saltos de línea excesivos
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    
+    return text.strip()
 
 
 def generate_cv_content(
@@ -92,10 +124,20 @@ def generate_cv_content(
         ])
     
     if company_info:
+        # Limpiar HTML de la información de la empresa antes de enviarlo al LLM
+        cleaned_info = company_info
+        if isinstance(company_info, dict):
+            cleaned_info = {
+                key: clean_html_text(str(value)) if isinstance(value, str) else value
+                for key, value in company_info.items()
+            }
+        elif isinstance(company_info, str):
+            cleaned_info = clean_html_text(company_info)
+        
         prompt_parts.extend([
             "",
             "INFORMACIÓN DE LA EMPRESA/OFERTA:",
-            f"{company_info}",
+            f"{cleaned_info}",
             "",
             "Adapta el CV específicamente para esta empresa y posición.",
         ])
@@ -125,6 +167,13 @@ def generate_cv_content(
         "- Las descripciones deben ser claras y orientadas a resultados",
         f"- IMPORTANTE: Usa EXACTAMENTE el nombre '{user.full_name}' sin modificarlo. Divide en firstname y lastname según corresponda.",
         "- Si no tienes información específica de experiencia o educación, inventa datos profesionales coherentes",
+        "",
+        "RESPUESTA DEL CHAT:",
+        "- Genera un campo 'chat_response' con una respuesta MUY CONCISA (máximo 2 líneas)",
+        "- Solo menciona LO MÁS IMPORTANTE que se agregó/modificó en el CV",
+        "- Formato ejemplo: 'He agregado experiencia en [empresa] y actualizado las habilidades técnicas.'",
+        "- Si es la primera generación: 'He creado tu CV con [X] experiencias y [Y] habilidades.'",
+        "- Sé específico pero breve. NO des explicaciones largas.",
     ])
     
     prompt = "\n".join(prompt_parts)

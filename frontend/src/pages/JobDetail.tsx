@@ -14,7 +14,7 @@ import {
   type Job,
   type UserResponse,
 } from "@/services";
-import { cleanHtml } from "@/utils/htmlCleaner";
+import { cleanHtml, stripHtml } from "@/utils/htmlCleaner";
 import { useToast } from "@/hooks/use-toast";
 
 export default function JobDetail() {
@@ -72,13 +72,15 @@ export default function JobDetail() {
 
       // Create CV with the job offering information
       // TODO: Get template_id from user preference or use default (1)
+      // Strip HTML from description for cleaner prompt
+      const cleanDescription = stripHtml(job.description);
       const cv = await cvService.create(projectId, {
         project_id: projectId,
         template_id: 1, // Default template
         messages: [
           {
             role: "user",
-            content: `Create a CV optimized for the position: ${job.title} at ${job.company}. ${job.description}`,
+            content: `Create a CV optimized for the position: ${job.title} at ${job.company}. ${cleanDescription}`,
             timestamp: new Date().toISOString(),
           },
         ],

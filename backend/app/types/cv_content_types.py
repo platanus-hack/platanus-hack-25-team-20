@@ -38,4 +38,5 @@ class GeneratedCVContentSimple(GeneratedCVContent):
     experiences: list[Experience]
     education: list[Education]
     skills: list[Skill]
+    chat_response: str
 

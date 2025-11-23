@@ -63,7 +63,18 @@ def create_cv(db: Session, cv_data: CVCreate) -> CV:
     
     content_dict = generated_content.model_dump()
     
+    # Extraer la respuesta del chat antes de guardar el contenido
+    chat_response = content_dict.pop('chat_response', None)
+    
     rendered_content = template_service.render_template(template, content_dict)
+    
+    # Agregar la respuesta del asistente al historial
+    if chat_response:
+        conversation_history.append({
+            "role": "assistant",
+            "content": chat_response,
+            "timestamp": datetime.utcnow().isoformat(),
+        })
     
     db_cv = CV(
         project_id=cv_data.project_id,
@@ -175,12 +186,24 @@ def regenerate_cv(
     )
     
     content_dict = generated_content.model_dump()
+    
+    # Extraer la respuesta del chat antes de guardar el contenido
+    chat_response = content_dict.pop('chat_response', None)
+    
     cv.content = content_dict
     
     if template:
         cv.rendered_content = template_service.render_template(template, content_dict)
     
-    # Actualizar historial con los nuevos mensajes
+    # Agregar la respuesta del asistente al historial
+    if chat_response:
+        updated_history.append({
+            "role": "assistant",
+            "content": chat_response,
+            "timestamp": datetime.utcnow().isoformat(),
+        })
+    
+    # Actualizar historial con los nuevos mensajes y la respuesta del asistente
     cv.conversation_history = updated_history
     flag_modified(cv, "conversation_history")
     
