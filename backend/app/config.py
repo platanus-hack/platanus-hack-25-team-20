@@ -9,7 +9,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     admin_username: str = "admin"
     admin_password: str = "admin"
-    
+    # Comma-separated list of allowed CORS origins
+    cors_origins: str = "http://localhost:5173,http://localhost:4173,http://localhost:3000,http://localhost,http://localhost:80"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

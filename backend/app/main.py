@@ -34,15 +34,12 @@ app = FastAPI(
 )
 
 # Configure CORS middleware
+# Parse CORS origins from comma-separated string
+cors_origins = [origin.strip() for origin in settings.cors_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vite dev server
-        "http://localhost:4173",  # Vite preview
-        "http://localhost:3000",  # Alternative dev port
-        "http://localhost",       # Docker frontend (port 80)
-        "http://localhost:80",    # Docker frontend (explicit port)
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

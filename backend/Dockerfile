@@ -23,6 +23,10 @@ COPY . .
 
 ENV PATH="/app/.venv/bin:${PATH}"
 
+# Railway sets PORT env var - default to 8000 for local development
+ENV PORT=8000
+
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use shell form to allow environment variable expansion
+CMD uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
